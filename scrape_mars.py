@@ -3,18 +3,15 @@ from splinter import Browser
 from bs4 import BeautifulSoup as bs
 import pandas as pd
 from selenium import webdriver
-from splinter import Browser
 from splinter.exceptions import ElementDoesNotExist
 import requests
 import time
 
 def init_browser():
     # @NOTE: Replace the path with your actual path to the chromedriver
-    executable_path = {
-        # "executable_path": "/usr/local/bin/chromedriver"      # MACOS
-        "executable_path": "chromedriver.exe"  # WINDOWS: Remember to manually paste the `chromedriver.exe` into the same folder
-    }
+    executable_path = {"executable_path": "/usr/local/bin/chromedriver"}
     return Browser("chrome", **executable_path, headless=False)
+
 
 def scrape():
     browser = init_browser()
@@ -25,7 +22,10 @@ def scrape():
     # Get Mars news
     url = "https://mars.nasa.gov/news/"
     browser.visit(url)
+    time.sleep(1)
     
+    html = browser.html
+    soup = bs(html, "html.parser")
     # find new news article titles
     news_title = soup.find("div",class_="content_title").text
     # find new news articles text
@@ -34,6 +34,7 @@ def scrape():
     #Get Mars img from JPL
     jpl_images_url = "https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars"
     browser.visit(jpl_images_url)
+    time.sleep(1)
     html = browser.html
     soup = bs(html, "html.parser")
     img_source = soup.find(class_ = "carousel_item")['style']
@@ -44,6 +45,8 @@ def scrape():
     featured_image_url = jpl_images_url + image_split
     
     #Twitter scrape
+    executable_path = {"executable_path": "chromedriver.exe"}
+    browser = Browser("chrome", **executable_path)
     twit_url = "https://twitter.com/marswxreport?lang=en"
     browser.visit(twit_url)
     
@@ -85,7 +88,7 @@ def scrape():
         browser.back()
         
         #Update mars_data with information
-        mars_data = {
+    mars_data = {
             "mars_news_title": news_title,
             "mars_news_teaser": news_text,
             "mars_tweet": target_tweet,
@@ -100,9 +103,9 @@ def scrape():
             "hemi_image_title_4": hemi_img_url[3]["title"],
             "hemi_image_url_4": hemi_img_url[3]["img_url"]      
         }
-        browser.quit()
+    browser.quit()
         
-        return mars_data
+    return mars_data
    
     
     
